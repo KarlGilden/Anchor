@@ -5,6 +5,9 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import { store } from './data/db';
 import cors from 'cors';
+import dotenv from 'dotenv'
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT;
@@ -19,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET!,
     cookie: {
       httpOnly: true,
       secure: false, //process.env.NODE_ENV === "production",
