@@ -6,6 +6,9 @@ import session from 'express-session';
 import { store } from './data/db';
 import cors from 'cors';
 import dotenv from 'dotenv'
+import habitRouter from './routes/habitRoutes';
+import habitSheetRouter from './routes/habitSheetRouter';
+import entryRouter from './routes/entryRouter';
 
 dotenv.config();
 
@@ -35,7 +38,9 @@ app.use(
 );
 
 app.use("/auth", authRouter);
-app.use("/user", userRouter);
+app.use("/habit-sheet", habitSheetRouter);
+app.use("/habit", habitRouter);
+app.use("/entry", entryRouter);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
