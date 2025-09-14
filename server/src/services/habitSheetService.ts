@@ -1,6 +1,6 @@
 import { db } from '../data/db'
 import { AppError } from '../types/error';
-import { Habit, HabitCreate } from '../types/habit';
+import { Habit, HabitCreate, HabitNumericConstraint } from '../types/habit';
 import { HabitSheet, HabitSheetInput } from '../types/habitSheet';
 
 const getAllHabitSheets = async (userId: number) => {
@@ -71,8 +71,8 @@ const updateHabitSheet = async (id: string, name: string, description: string) =
 const deleteHabitSheet = async (id: string) => {
     try{
         const deletedCount = await db("habit_sheets")
-      .where("id", id)
-      .delete();
+            .where("id", id)
+            .delete();
 
       return deletedCount;
     }catch (error){
@@ -83,16 +83,32 @@ const deleteHabitSheet = async (id: string) => {
 
 const createHabit = async (habit: HabitCreate, sheetId: string, userId: number) => {
     try{
-        const [habitId] = await db<Habit>("habits")
-            .insert({
-                habit_sheet_id: Number(sheetId),
-                name: habit.name,
-                description: habit.description,
-                entry_type: habit.entry_type,
-                question: habit.question
+        const result = await db.transaction(async (trx) => {
+            const [habitId] = await trx<Habit>("habits")
+                .insert({
+                    habit_sheet_id: Number(sheetId),
+                    name: habit.name,
+                    description: habit.description,
+                    entry_type: habit.entry_type,
+                    question: habit.question
             });
 
-        return habitId;
+            if(habit.entry_type === "number"){
+                const [constraintId] = await trx<HabitNumericConstraint>("habit_numeric_constraints")
+                    .insert({
+                        habit_id: habitId,
+                        constraint_type: habit.constraint_type,
+                        lower_bound: habit.lower_bound,
+                        upper_bound: habit.upper_bound
+                    });
+
+                return {habitId, constraintId}
+            }
+
+            return {habitId, constraintId: undefined};
+        });
+
+        return result;
     }catch (error){
         console.log(error);
         throw new AppError("Failed to create habit", 500);

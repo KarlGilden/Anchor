@@ -20,6 +20,9 @@ export interface HabitCreate {
   description?: string;
   question?: string;
   entry_type: EntryType;
+  constraint_type: ConstraintType;
+  lower_bound: number;
+  upper_bound: number | null;
 }
 
 // ==========================
@@ -42,7 +45,13 @@ export interface HabitEntry {
   id: number;
   habit_id: number;
   value: number;
-  date: string;
+  date: Date;
   created_at: Date;
   is_pass: boolean;
+}
+
+export interface HabitEntryCreate {
+  value?: number;
+  is_pass?: boolean
+  date: string;
 }

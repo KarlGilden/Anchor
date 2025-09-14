@@ -102,7 +102,11 @@ const createHabit = async (req: Request, res: Response) => {
 
     const returnHabit = await habitSheetService.createHabit(habit, id, userId);
 
-    return res.status(201).send({ id: returnHabit });
+    if(!returnHabit.habitId){
+        throw new AppError("Failed to create habit", 500);
+    }
+
+    return res.status(201).send(returnHabit);
 
 };
 
